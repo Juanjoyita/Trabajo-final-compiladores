@@ -7,6 +7,7 @@ from generated.LogicaParser import LogicaParser
 
 from semantic_analyzer.semantic_visitor import SemanticAnalyzer
 from codegen.generator import CodeGenerator
+import os
 
 
 def main():
@@ -16,36 +17,42 @@ def main():
 
     input_file = sys.argv[1]
 
-    # ============================
-    #   Abrir archivo output.txt
-    # ============================
+    # =========================================
+    #   NOMBRE BASE PARA ARCHIVOS DE SALIDA
+    # =========================================
+    base_name = os.path.splitext(os.path.basename(input_file))[0]
+
+    output_text_file = f"output_{base_name}.txt"
+    output_program_file = f"output_program_{base_name}.py"
+
     log = []
     log.append("===== Mini Compilador - Registro de Ejecución =====\n")
 
     # Leer INPUT
     log.append("[INPUT]\n")
     try:
-        with open(input_file, "r") as f:
+        with open(input_file, "r", encoding="utf-8") as f:
             log.append(f.read() + "\n")
     except:
         log.append("Error: No se pudo leer el archivo de entrada.\n")
-        with open("output.txt", "w") as f:
+        with open(output_text_file, "w") as f:
             f.write("\n".join(log))
+        print(f"❌ Error al leer archivo. Revisa {output_text_file}")
         return
 
-    # ============================
+    # =========================================
     #   LEXER + PARSER
-    # ============================
-    input_stream = FileStream(input_file)
+    # =========================================
+    input_stream = FileStream(input_file, encoding="utf-8")
     lexer = LogicaLexer(input_stream)
     tokens = CommonTokenStream(lexer)
     parser = LogicaParser(tokens)
 
     tree = parser.program()
 
-    # ============================
-    #   ANALISIS SEMÁNTICO
-    # ============================
+    # =========================================
+    #   ANÁLISIS SEMÁNTICO
+    # =========================================
     analyzer = SemanticAnalyzer()
     semantic_ok = analyzer.visit(tree)
 
@@ -53,35 +60,35 @@ def main():
         log.append("[SEMÁNTICA]\n")
         for e in analyzer.errors:
             log.append("  - " + e)
-        log.append("\n[ESTADO] ❌ Compilación fallida.\n")
+        log.append(f"\n[ESTADO] ❌ Compilación fallida.\n")
 
-        with open("output.txt", "w") as f:
+        with open(output_text_file, "w") as f:
             f.write("\n".join(log))
 
-        print("❌ Errores semánticos detectados. Revisa output.txt.")
+        print(f"❌ Errores semánticos. Revisa {output_text_file}")
         return
 
     log.append("[SEMÁNTICA]\n✔ Sin errores semánticos.\n")
 
-    # ============================
+    # =========================================
     #   GENERACIÓN DE CÓDIGO
-    # ============================
+    # =========================================
     generator = CodeGenerator()
     output_program = generator.visit(tree)
 
-    with open("output_program.py", "w") as f:
+    with open(output_program_file, "w") as f:
         f.write(output_program)
 
-    log.append("[CODEGEN]\n✔ Código generado en output_program.py.\n")
+    log.append(f"[CODEGEN]\n✔ Código generado en {output_program_file}.\n")
 
-    # ============================
+    # =========================================
     #   EJECUCIÓN DEL PROGRAMA GENERADO
-    # ============================
+    # =========================================
     log.append("[PYTHON OUTPUT]\n")
 
     try:
         result = subprocess.run(
-            ["python3", "output_program.py"],
+            ["python3", output_program_file],
             capture_output=True,
             text=True
         )
@@ -91,13 +98,13 @@ def main():
 
     log.append("\n[EJECUCIÓN COMPLETADA]\n")
 
-    # ============================
+    # =========================================
     #   GUARDAR OUTPUT FINAL
-    # ============================
-    with open("output.txt", "w") as f:
+    # =========================================
+    with open(output_text_file, "w") as f:
         f.write("\n".join(log))
 
-    print("✅ Todo OK. Revisa output.txt y output_program.py")
+    print(f"✅ Test finalizado. Revisa {output_text_file} y {output_program_file}")
 
 
 if __name__ == "__main__":

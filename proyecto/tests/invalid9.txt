@@ -1,0 +1,5 @@
+a = TRUE;
+
+if a AND TRUE {
+    print(a);
+}

@@ -1,0 +1,7 @@
+a = FALSE;
+
+if (NOT a) {
+    a = TRUE;
+}
+
+print(a);

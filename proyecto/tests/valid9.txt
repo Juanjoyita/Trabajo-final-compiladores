@@ -1,0 +1,8 @@
+x = TRUE;
+y = FALSE;
+
+if (x) {
+    print(x);
+} else {
+    print(y);
+}

@@ -1,0 +1,7 @@
+flag = FALSE;
+
+while (NOT flag) {
+    flag = TRUE;
+}
+
+print(flag);

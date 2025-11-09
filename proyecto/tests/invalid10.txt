@@ -1,0 +1,6 @@
+flag = TRUE;
+
+while flag {
+    flag = FALSE;
+}
+

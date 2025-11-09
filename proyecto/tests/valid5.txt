@@ -1,0 +1,7 @@
+x = TRUE;
+y = FALSE;
+
+while (x) {
+    print(x);
+    x = FALSE;
+}

@@ -1,0 +1,4 @@
+a = TRUE;
+if ( (a AND NOT b ) {
+    print(a);
+}
