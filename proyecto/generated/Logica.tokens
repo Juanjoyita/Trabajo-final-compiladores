@@ -16,6 +16,7 @@ NOT=15
 ID=16
 WS=17
 COMMENT=18
+ERROR_CHAR=19
 '='=1
 ';'=2
 'print'=3

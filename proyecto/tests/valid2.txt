@@ -1,4 +1,4 @@
-a = TRUE;
-b = FALSE;
-print(a);
-print(b);
+x = TRUE;
+z = FALSE;
+print(x);
+print(z);

@@ -1,7 +1,8 @@
 a = FALSE;
+b = TRUE;
 
-if (NOT a) {
-    a = TRUE;
+if (a) {
+    print(a);
+} else {
+    print(b);
 }
-
-print(a);

@@ -1,5 +1,12 @@
 a = TRUE;
+b = FALSE;
 
-if (a AND b) {  // b no está declarada
+if (a AND NOT b) {
     print(a);
+} else {
+    print(b);
+}
+
+while (a) {
+    a = FALSE;
 }

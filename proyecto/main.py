@@ -1,13 +1,14 @@
 import sys
 import subprocess
 from antlr4 import *
+import os
 
 from generated.LogicaLexer import LogicaLexer
 from generated.LogicaParser import LogicaParser
 
 from semantic_analyzer.semantic_visitor import SemanticAnalyzer
+from semantic_analyzer.listener import LexerErrorListener, SyntaxErrorListener
 from codegen.generator import CodeGenerator
-import os
 
 
 def main():
@@ -28,7 +29,9 @@ def main():
     log = []
     log.append("===== Mini Compilador - Registro de Ejecución =====\n")
 
-    # Leer INPUT
+    # =========================================
+    #   LEER INPUT
+    # =========================================
     log.append("[INPUT]\n")
     try:
         with open(input_file, "r", encoding="utf-8") as f:
@@ -41,14 +44,57 @@ def main():
         return
 
     # =========================================
-    #   LEXER + PARSER
+    #   LÉXICO (LEXER)
     # =========================================
     input_stream = FileStream(input_file, encoding="utf-8")
     lexer = LogicaLexer(input_stream)
+
+    # ✅ MANEJADOR DE ERRORES LÉXICOS
+    lexer_errors = LexerErrorListener()
+    lexer.removeErrorListeners()
+    lexer.addErrorListener(lexer_errors)
+
     tokens = CommonTokenStream(lexer)
+    tokens.fill()   # IMPORTANTE: obliga a leer todos los tokens y detectar errores
+
+    # ✅ DETECTAR ERRORES LÉXICOS
+    if lexer_errors.errors:
+        log.append("[LÉXICOS]\n")
+        for e in lexer_errors.errors:
+            log.append("  - " + e)
+        log.append("\n[ESTADO] ❌ Compilación fallida por errores léxicos.\n")
+
+        with open(output_text_file, "w") as f:
+            f.write("\n".join(log))
+
+        print(f"❌ Errores léxicos. Revisa {output_text_file}")
+        return
+
+    # =========================================
+    #   SINTAXIS (PARSER)
+    # =========================================
     parser = LogicaParser(tokens)
 
+    # ✅ MANEJADOR DE ERRORES SINTÁCTICOS
+    syntax_errors = SyntaxErrorListener()
+    parser.removeErrorListeners()
+    parser.addErrorListener(syntax_errors)
+
     tree = parser.program()
+
+    # ✅ DETECTAR ERRORES SINTÁCTICOS
+    if syntax_errors.errors:
+        log.append("[SINTÁCTICOS]\n")
+        for e in syntax_errors.errors:
+            log.append("  - " + e)
+
+        log.append("\n[ESTADO] ❌ Compilación fallida por errores sintácticos.\n")
+
+        with open(output_text_file, "w") as f:
+            f.write("\n".join(log))
+
+        print(f"❌ Errores sintácticos. Revisa {output_text_file}")
+        return
 
     # =========================================
     #   ANÁLISIS SEMÁNTICO
@@ -60,7 +106,8 @@ def main():
         log.append("[SEMÁNTICA]\n")
         for e in analyzer.errors:
             log.append("  - " + e)
-        log.append(f"\n[ESTADO] ❌ Compilación fallida.\n")
+
+        log.append("\n[ESTADO] ❌ Compilación fallida por errores semánticos.\n")
 
         with open(output_text_file, "w") as f:
             f.write("\n".join(log))
@@ -71,7 +118,7 @@ def main():
     log.append("[SEMÁNTICA]\n✔ Sin errores semánticos.\n")
 
     # =========================================
-    #   GENERACIÓN DE CÓDIGO
+    #   GENERACIÓN DE CÓDIGO SOLO SI TODO ESTÁ BIEN
     # =========================================
     generator = CodeGenerator()
     output_program = generator.visit(tree)
@@ -82,7 +129,7 @@ def main():
     log.append(f"[CODEGEN]\n✔ Código generado en {output_program_file}.\n")
 
     # =========================================
-    #   EJECUCIÓN DEL PROGRAMA GENERADO
+    #   EJECUTAR PROGRAMA GENERADO
     # =========================================
     log.append("[PYTHON OUTPUT]\n")
 
@@ -92,14 +139,14 @@ def main():
             capture_output=True,
             text=True
         )
-        log.append(result.stdout)
+        log.append(result.stdout.strip() + "\n")
     except Exception as e:
         log.append(f"Error al ejecutar el programa generado: {e}")
 
-    log.append("\n[EJECUCIÓN COMPLETADA]\n")
+    log.append("[EJECUCIÓN COMPLETADA]\n")
 
     # =========================================
-    #   GUARDAR OUTPUT FINAL
+    #   GUARDAR LOG FINAL
     # =========================================
     with open(output_text_file, "w") as f:
         f.write("\n".join(log))
