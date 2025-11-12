@@ -1,20 +1,20 @@
-# semantic_analyzer/listener.py
-
 from antlr4.error.ErrorListener import ErrorListener
 
 class LexerErrorListener(ErrorListener):
-    """Captura y almacena errores léxicos del lexer (caracteres no válidos)."""
+    """Captura y almacena errores léxicos del lexer (caracteres o tokens no válidos)."""
 
     def __init__(self):
         super().__init__()
         self.errors = []
 
     def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
-        """
-        Este método se ejecuta cuando ANTLR detecta un error LÉXICO,
-        por ejemplo: caracteres inválidos, tokens mal formados, etc.
-        """
-        error_message = f"[Línea {line}, Columna {column}] Error léxico: {msg}"
+        text = offendingSymbol.text if offendingSymbol else "?"
+        if offendingSymbol.type == recognizer.symbolicNames.index("INVALID_NUMBER"):
+            error_message = f"[Línea {line}, Columna {column}] Error léxico: Uso de números no permitido ('{text}')"
+        elif offendingSymbol.type == recognizer.symbolicNames.index("ERROR_CHAR"):
+            error_message = f"[Línea {line}, Columna {column}] Error léxico: Carácter no permitido ('{text}')"
+        else:
+            error_message = f"[Línea {line}, Columna {column}] Error léxico: {msg}"
         self.errors.append(error_message)
 
 
@@ -26,9 +26,5 @@ class SyntaxErrorListener(ErrorListener):
         self.errors = []
 
     def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
-        """
-        Este método se ejecuta cuando ANTLR detecta un error SINTÁCTICO,
-        por ejemplo: falta de ';', paréntesis incorrectos, tokens fuera de lugar, etc.
-        """
         error_message = f"[Línea {line}, Columna {column}] Error sintáctico: {msg}"
         self.errors.append(error_message)

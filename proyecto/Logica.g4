@@ -72,6 +72,5 @@ COMMENT : '//' ~[\r\n]* -> skip ;
 // ----------------------
 // ERROR LÉXICO
 // ----------------------
-ERROR_CHAR
-    : .
-    ;
+INVALID_NUMBER : [0-9]+ ;
+ERROR_CHAR : .;
