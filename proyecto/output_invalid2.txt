@@ -1,0 +1,15 @@
+===== Mini Compilador - Registro de Ejecución =====
+
+[INPUT]
+
+a = TRUE;
+if (a AND b) {
+    print(a);
+}
+
+
+[SEMÁNTICA]
+
+  - [Error] Variable 'b' usada sin declarar.
+
+[ESTADO] ❌ Compilación fallida por errores semánticos.
