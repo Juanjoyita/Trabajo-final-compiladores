@@ -1,0 +1,14 @@
+===== Mini Compilador - Registro de Ejecución =====
+
+[INPUT]
+
+a = 123;
+b = $INVALID;
+
+
+[SINTÁCTICOS]
+
+  - [Línea 1, Columna 4] Error sintáctico: mismatched input '123' expecting {'(', 'TRUE', 'FALSE', 'NOT', ID}
+  - [Línea 2, Columna 4] Error sintáctico: extraneous input '$' expecting {'(', 'TRUE', 'FALSE', 'NOT', ID}
+
+[ESTADO] ❌ Compilación fallida por errores sintácticos.

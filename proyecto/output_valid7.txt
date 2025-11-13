@@ -1,0 +1,25 @@
+===== Mini Compilador - Registro de Ejecución =====
+
+[INPUT]
+
+a = TRUE;
+b = FALSE;
+
+if (a) {
+    if (NOT b) {
+        print(a);
+    }
+}
+
+
+[SEMÁNTICA]
+✔ Sin errores semánticos.
+
+[CODEGEN]
+✔ Código generado en output_program_valid7.py.
+
+[PYTHON OUTPUT]
+
+True
+
+[EJECUCIÓN COMPLETADA]

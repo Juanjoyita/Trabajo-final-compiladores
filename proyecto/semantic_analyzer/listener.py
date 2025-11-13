@@ -1,68 +1,74 @@
-from antlr4.error.ErrorListener import ErrorListener
-
+from antlr4.error.ErrorListener import ErrorListener  # Importa clase base para listeners de errores de ANTLR
 
 # ===============================================================
 # LÉXICO: DETECTOR DE ERRORES LÉXICOS
 # ===============================================================
 class LexerErrorListener(ErrorListener):
     """
-    Captura errores léxicos del lexer.
-    Se activa cuando aparecen caracteres o tokens no válidos.
+    Listener personalizado para errores léxicos.
+    Se activa cuando el lexer detecta tokens inválidos o caracteres prohibidos.
     """
 
     def __init__(self):
-        super().__init__()
-        self.errors = []
+        super().__init__()       # Llama al constructor de la clase base
+        self.errors = []         # Lista para almacenar errores léxicos detectados
 
     def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
         """
-        Detecta tipos de errores léxicos específicos:
-        - Números no permitidos (token INVALID_NUMBER)
-        - Caracteres desconocidos (token ERROR_CHAR)
-        - Cualquier otro error genérico del lexer
+        Método que captura errores del lexer automáticamente.
+        Parámetros:
+        - recognizer: lexer que detectó el error
+        - offendingSymbol: token problemático
+        - line, column: posición del error
+        - msg: mensaje de error
         """
-        text = offendingSymbol.text if offendingSymbol else "?"
+        text = offendingSymbol.text if offendingSymbol else "?"  # Obtiene el texto del token
 
-        # Intentar identificar el tipo de token (según el índice del lexer)
+        # Intenta clasificar el error según el tipo de token
         try:
-            token_type = offendingSymbol.type
-            token_names = recognizer.symbolicNames
+            token_type = offendingSymbol.type                 # Tipo de token
+            token_names = recognizer.symbolicNames           # Nombres de tokens definidos en la gramática
 
             if token_type == token_names.index("INVALID_NUMBER"):
+                # Error de número no permitido
                 error_message = f"[Línea {line}, Columna {column}] Error léxico: Uso de números no permitido ('{text}')"
             elif token_type == token_names.index("ERROR_CHAR"):
+                # Error de carácter inválido
                 error_message = f"[Línea {line}, Columna {column}] Error léxico: Carácter no permitido ('{text}')"
             else:
+                # Cualquier otro error genérico del lexer
                 error_message = f"[Línea {line}, Columna {column}] Error léxico: {msg}"
         except Exception:
-            # Si por alguna razón no se puede identificar el tipo exacto
+            # Si falla la identificación del tipo de token, usa mensaje genérico
             error_message = f"[Línea {line}, Columna {column}] Error léxico: {msg}"
 
-        self.errors.append(error_message)
-
+        self.errors.append(error_message)  # Guarda el error en la lista
 
 # ===============================================================
 # SINTAXIS: DETECTOR DE ERRORES SINTÁCTICOS
 # ===============================================================
 class SyntaxErrorListener(ErrorListener):
     """
-    Captura errores sintácticos del parser.
-    Se activa cuando hay estructuras inválidas en el lenguaje,
-    como:
+    Listener personalizado para errores sintácticos.
+    Se activa cuando el parser encuentra estructuras inválidas:
       - Falta de ';'
       - Paréntesis o llaves mal colocados
-      - Tokens en orden incorrecto
+      - Orden incorrecto de tokens
     """
 
     def __init__(self):
-        super().__init__()
-        self.errors = []
+        super().__init__()  # Llama al constructor de la clase base
+        self.errors = []    # Lista para almacenar errores sintácticos
 
     def syntaxError(self, recognizer, offendingSymbol, line, column, msg, e):
         """
-        Guarda el mensaje de error sintáctico.
-        ANTLR provee automáticamente la descripción del fallo.
+        Método que captura errores de sintaxis automáticamente.
+        Parámetros:
+        - recognizer: parser que detectó el error
+        - offendingSymbol: token problemático
+        - line, column: posición del error
+        - msg: mensaje generado por ANTLR
         """
-        text = offendingSymbol.text if offendingSymbol else "?"
-        error_message = f"[Línea {line}, Columna {column}] Error sintáctico: {msg}"
-        self.errors.append(error_message)
+        text = offendingSymbol.text if offendingSymbol else "?"  # Texto del token problemático
+        error_message = f"[Línea {line}, Columna {column}] Error sintáctico: {msg}"  # Crea mensaje detallado
+        self.errors.append(error_message)  # Guarda el error en la lista

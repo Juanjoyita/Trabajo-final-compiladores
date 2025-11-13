@@ -1,0 +1,19 @@
+// Asignaciones simples
+a = TRUE;
+b = FALSE;
+
+// Uso de variables y NOT
+c = a;
+d = NOT b;
+
+// Expresiones combinadas
+e = a AND b;
+f = (a OR b) AND (c OR d);
+
+// Print de variables
+print(a);
+print(b);
+print(c);
+print(d);
+print(e);
+print(f);

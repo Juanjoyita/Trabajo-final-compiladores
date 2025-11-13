@@ -1,0 +1,11 @@
+===== Mini Compilador - Registro de Ejecución =====
+
+[INPUT]
+
+a = 123;
+
+[SINTÁCTICOS]
+
+  - [Línea 1, Columna 4] Error sintáctico: mismatched input '123' expecting {'(', 'TRUE', 'FALSE', 'NOT', ID}
+
+[ESTADO] ❌ Compilación fallida por errores sintácticos.

@@ -1,0 +1,15 @@
+===== Mini Compilador - Registro de Ejecución =====
+
+[INPUT]
+
+a = TRUE;
+
+if (a) {
+    print(a);
+
+
+[SINTÁCTICOS]
+
+  - [Línea 5, Columna 0] Error sintáctico: extraneous input '<EOF>' expecting {'print', 'if', 'while', '}', ID}
+
+[ESTADO] ❌ Compilación fallida por errores sintácticos.

@@ -1,4 +1,1 @@
-a = TRUE;
-b = FALSE;
-
-c = a AND AND b;
+x = y; 

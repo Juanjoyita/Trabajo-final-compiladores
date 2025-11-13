@@ -1,6 +1,2 @@
-flag = TRUE;
-
-while flag {
-    flag = FALSE;
-}
-
+fx = TRUE;
+x = 123;        

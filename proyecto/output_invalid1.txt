@@ -1,0 +1,14 @@
+===== Mini Compilador - Registro de Ejecución =====
+
+[INPUT]
+
+a$ = TRUE;
+print(a$);
+
+
+[SINTÁCTICOS]
+
+  - [Línea 1, Columna 1] Error sintáctico: extraneous input '$' expecting '='
+  - [Línea 2, Columna 7] Error sintáctico: extraneous input '$' expecting ')'
+
+[ESTADO] ❌ Compilación fallida por errores sintácticos.

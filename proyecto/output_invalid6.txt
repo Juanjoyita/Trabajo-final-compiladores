@@ -1,0 +1,11 @@
+===== Mini Compilador - Registro de Ejecución =====
+
+[INPUT]
+
+x = y; 
+
+[SEMÁNTICA]
+
+  - [Error] Variable 'y' usada sin declarar.
+
+[ESTADO] ❌ Compilación fallida por errores semánticos.

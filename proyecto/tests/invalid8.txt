@@ -1,1 +1,6 @@
-a = ;
+a = TRUE;
+b = FALSE;
+
+if (a AND c) {   
+    print(a);
+}
