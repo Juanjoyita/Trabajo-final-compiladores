@@ -15,6 +15,24 @@ from semantic_analyzer.listener import LexerErrorListener, SyntaxErrorListener
 from codegen.generator import CodeGenerator
 
 
+# ======================================================
+# FUNCIÓN PARA IMPRIMIR ÁRBOL SINTÁCTICO JERÁRQUICO
+# ======================================================
+def print_tree(node, rule_names, indent=""):
+    """
+    Imprime el árbol sintáctico en formato jerárquico.
+    """
+    if node.getChildCount() == 0:
+        print(indent + f"- {node.getText()}")
+        return
+
+    rule_name = rule_names[node.getRuleIndex()]
+    print(indent + f"[{rule_name}]")
+
+    for i in range(node.getChildCount()):
+        print_tree(node.getChild(i), rule_names, indent + "  ")
+
+
 def main():
     # Verifica que se haya pasado un archivo de entrada
     if len(sys.argv) < 2:
@@ -40,28 +58,27 @@ def main():
     log.append("[INPUT]\n")
     try:
         with open(input_file, "r", encoding="utf-8") as f:
-            log.append(f.read() + "\n")  # Se abre el archivo.txt agrega contenido del archivo al log
+            log.append(f.read() + "\n")
     except:
         log.append("Error: No se pudo leer el archivo de entrada.\n")
         with open(output_text_file, "w") as f:
-            f.write("\n".join(log))   # Guarda log parcial
+            f.write("\n".join(log))
         print(f"❌ Error al leer archivo. Revisa {output_text_file}")
         return
 
     # ================================
-    # Análisis léxico (Lexer)
+    # Análisis léxico
     # ================================
-    input_stream = FileStream(input_file, encoding="utf-8")  # Crea stream para lexer
-    lexer = LogicaLexer(input_stream)                        # Inicializa lexer
+    input_stream = FileStream(input_file, encoding="utf-8")
+    lexer = LogicaLexer(input_stream)
 
-    lexer_errors = LexerErrorListener()  # Listener personalizado para errores léxicos
-    lexer.removeErrorListeners()          # Elimina listeners por defecto
-    lexer.addErrorListener(lexer_errors)  # Agrega listener personalizado
+    lexer_errors = LexerErrorListener()
+    lexer.removeErrorListeners()
+    lexer.addErrorListener(lexer_errors)
 
-    tokens = CommonTokenStream(lexer)     # Genera stream de tokens
-    tokens.fill()                         # Lee todos los tokens para detectar errores
+    tokens = CommonTokenStream(lexer)
+    tokens.fill()
 
-    # Verifica errores léxicos
     if lexer_errors.errors:
         log.append("[LÉXICOS]\n")
         for e in lexer_errors.errors:
@@ -70,22 +87,20 @@ def main():
 
         with open(output_text_file, "w") as f:
             f.write("\n".join(log))
-
         print(f"❌ Errores léxicos. Revisa {output_text_file}")
         return
 
     # ================================
-    # Análisis sintáctico (Parser)
+    # Análisis sintáctico
     # ================================
-    parser = LogicaParser(tokens)  # Inicializa parser con los tokens
+    parser = LogicaParser(tokens)
 
-    syntax_errors = SyntaxErrorListener()  # Listener para errores sintácticos
-    parser.removeErrorListeners()           # Elimina listeners por defecto
-    parser.addErrorListener(syntax_errors)  # Agrega listener personalizado
+    syntax_errors = SyntaxErrorListener()
+    parser.removeErrorListeners()
+    parser.addErrorListener(syntax_errors)
 
-    tree = parser.program()  # Construye árbol de parseo (AST)
+    tree = parser.program()
 
-    # Verifica errores sintácticos
     if syntax_errors.errors:
         log.append("[SINTÁCTICOS]\n")
         for e in syntax_errors.errors:
@@ -94,17 +109,28 @@ def main():
 
         with open(output_text_file, "w") as f:
             f.write("\n".join(log))
-
         print(f"❌ Errores sintácticos. Revisa {output_text_file}")
         return
 
     # ================================
+    # MOSTRAR ÁRBOLES SINTÁCTICOS (SOLO EN TESTS VÁLIDOS)
+    # ================================
+    print("\n===================================================")
+    print("============== ÁRBOL SINTÁCTICO (LISP) =============")
+    print("===================================================\n")
+    print(tree.toStringTree(recog=parser))
+    print("\n===================================================")
+    print("=========== ÁRBOL SINTÁCTICO (JERÁRQUICO) =========")
+    print("===================================================\n")
+    print_tree(tree, parser.ruleNames)
+    print("\n===================================================\n")
+
+    # ================================
     # Análisis semántico
     # ================================
-    analyzer = SemanticAnalyzer()  # Inicializa analizador semántico
-    semantic_ok = analyzer.visit(tree)  # Recorre AST para validar tipos y variables
+    analyzer = SemanticAnalyzer()
+    semantic_ok = analyzer.visit(tree)
 
-    # Verifica errores semánticos
     if analyzer.errors:
         log.append("[SEMÁNTICA]\n")
         for e in analyzer.errors:
@@ -122,40 +148,36 @@ def main():
     # ================================
     # Generación de código Python
     # ================================
-    generator = CodeGenerator()           # Inicializa generador de código
-    output_program = generator.visit(tree)  # Genera código Python desde AST
+    generator = CodeGenerator()
+    output_program = generator.visit(tree)
 
     with open(output_program_file, "w") as f:
-        f.write(output_program)           # Guarda código generado
+        f.write(output_program)
 
     log.append(f"[CODEGEN]\n✔ Código generado en {output_program_file}.\n")
 
     # ================================
-    # Ejecutar programa generado
+    # Ejecutar el programa generado
     # ================================
     log.append("[PYTHON OUTPUT]\n")
 
     try:
         result = subprocess.run(
-            ["python3", output_program_file],  # Ejecuta el archivo Python
-            capture_output=True,               # Captura salida estándar
+            ["python3", output_program_file],
+            capture_output=True,
             text=True
         )
-        log.append(result.stdout.strip() + "\n")  # Agrega salida al log
+        log.append(result.stdout.strip() + "\n")
     except Exception as e:
         log.append(f"Error al ejecutar el programa generado: {e}\n")
 
     log.append("[EJECUCIÓN COMPLETADA]\n")
 
-    # ================================
-    # Guardar log final
-    # ================================
     with open(output_text_file, "w") as f:
-        f.write("\n".join(log))  # Guarda todo el registro de ejecución
+        f.write("\n".join(log))
 
     print(f"✅ Test finalizado. Revisa {output_text_file} y {output_program_file}")
 
 
-# Punto de entrada del script
 if __name__ == "__main__":
     main()
