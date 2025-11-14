@@ -26,8 +26,8 @@ def main():
     # ================================
     # Definir nombres de archivos de salida
     # ================================
-    base_name = os.path.splitext(os.path.basename(input_file))[0]  # Nombre base sin extensión
-    output_text_file = f"output_{base_name}.txt"          # Archivo log de compilación
+    base_name = os.path.splitext(os.path.basename(input_file))[0]  # Nombre de los archivos de salida 
+    output_text_file = f"output_{base_name}.txt"          # Archivo registro de compilación
     output_program_file = f"output_program_{base_name}.py"  # Archivo Python generado
 
     # Inicializa el registro de ejecución
@@ -40,7 +40,7 @@ def main():
     log.append("[INPUT]\n")
     try:
         with open(input_file, "r", encoding="utf-8") as f:
-            log.append(f.read() + "\n")  # Agrega contenido del archivo al log
+            log.append(f.read() + "\n")  # Se abre el archivo.txt agrega contenido del archivo al log
     except:
         log.append("Error: No se pudo leer el archivo de entrada.\n")
         with open(output_text_file, "w") as f:

@@ -1,11 +1,11 @@
 grammar Logica;
 
-// Programa raíz: uno o más statements hasta EOF
+// Regla principal valido cuando tenga una o mas sentencias y debe terminar en fin del archivo 
 program
     : statement+ EOF
     ;
 
-// Sentencias permitidas: asignación, print, if, while
+// Sentencias permitidas: asignación, print, if, while base del lenguaje 
 statement
     : assignment
     | printStmt
@@ -18,7 +18,7 @@ assignment
     : ID '=' boolExpr ';'
     ;
 
-// Print: imprimir valor de una variable
+// Print: imprimir valor de una variable y no imprime expresiones
 printStmt
     : 'print' '(' ID ')' ';'
     ;
@@ -38,7 +38,7 @@ block
     : '{' statement+ '}'
     ;
 
-// Expresiones booleanas: OR recursivo
+// Expresiones booleanas: OR recursivo el cual tiene menor prioridad que AND 
 boolExpr
     : boolExpr OR boolTerm        # orExpr
     | boolTerm                    # toTerm
@@ -50,7 +50,8 @@ boolTerm
     | boolFactor                  # toFactor
     ;
 
-// Factor booleano: NOT, paréntesis, ID o constantes
+// Elementos básicos de una expresión booleana:
+// permite NOT, paréntesis, variables y valores TRUE/FALSE
 boolFactor
     : NOT boolFactor              # notFactor
     | '(' boolExpr ')'            # parenExpr
@@ -73,5 +74,5 @@ ID      : [a-zA-Z_] [a-zA-Z_0-9]* ;
 WS      : [ \t\r\n]+ -> skip ;
 COMMENT : '//' ~[\r\n]* -> skip ;
 
-// Manejo de errores léxicos
+// Manejo de error lexico cualquier digito sera capturado como un error lexico 
 INVALID_NUMBER : [0-9]+ ; // números no permitidos

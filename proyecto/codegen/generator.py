@@ -17,7 +17,7 @@ class CodeGenerator(LogicaVisitor):
     # PROGRAMA PRINCIPAL
     # ============================================
     def visitProgram(self, ctx):
-        # Encabezado del código generado
+        # genera estructura base del archivo (encabezado)
         self.lines.append("# ============================================")
         self.lines.append("# Código generado automáticamente por MiniCompilador")
         self.lines.append("# NO MODIFICAR MANUALMENTE")
@@ -34,7 +34,7 @@ class CodeGenerator(LogicaVisitor):
         self.lines.append("def main():")
         self.lines.append(self.indent + "# --- Inicio del programa generado ---")
 
-        # Recorrer y generar código de cada sentencia del programa
+        # Recorre cada sentencia  y generar código traducido con la identancion correcta 
         for stmt in ctx.statement():
             code = self.visit(stmt)             # Genera código para la sentencia
             if code:
@@ -109,6 +109,7 @@ class CodeGenerator(LogicaVisitor):
     # ============================================
     # EXPRESIONES BOOLEANAS
     # ============================================
+    # traduce las operaciones logicas 
     def visitOrExpr(self, ctx):
         # Genera código para OR: (expr OR term)
         return f"({self.visit(ctx.boolExpr())} or {self.visit(ctx.boolTerm())})"
@@ -122,7 +123,7 @@ class CodeGenerator(LogicaVisitor):
         return f"(not {self.visit(ctx.boolFactor())})"
 
     def visitParenExpr(self, ctx):
-        # Genera código para expresión entre paréntesis
+        # maneja expreciones entre parentesis y las variables usadas dentro de expresiones 
         return f"({self.visit(ctx.boolExpr())})"
 
     # ============================================
