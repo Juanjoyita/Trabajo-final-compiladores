@@ -1,4 +1,1 @@
-a = TRUE;
-
-if (a) {
-    print(a);
+a = TRUE@;

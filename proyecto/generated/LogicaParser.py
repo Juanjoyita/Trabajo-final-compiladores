@@ -10,7 +10,7 @@ else:
 
 def serializedATN():
     return [
-        4,1,20,101,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,
+        4,1,19,101,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,
         6,2,7,7,7,2,8,7,8,2,9,7,9,1,0,4,0,22,8,0,11,0,12,0,23,1,0,1,0,1,
         1,1,1,1,1,1,1,3,1,32,8,1,1,2,1,2,1,2,1,2,1,2,1,3,1,3,1,3,1,3,1,3,
         1,3,1,4,1,4,1,4,1,4,1,4,1,4,1,4,3,4,52,8,4,1,5,1,5,1,5,1,5,1,5,1,
@@ -60,8 +60,7 @@ class LogicaParser ( Parser ):
     symbolicNames = [ "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
                       "<INVALID>", "<INVALID>", "<INVALID>", "<INVALID>", 
                       "<INVALID>", "<INVALID>", "<INVALID>", "TRUE", "FALSE", 
-                      "AND", "OR", "NOT", "ID", "WS", "COMMENT", "INVALID_NUMBER", 
-                      "ERROR_CHAR" ]
+                      "AND", "OR", "NOT", "ID", "WS", "COMMENT", "INVALID_NUMBER" ]
 
     RULE_program = 0
     RULE_statement = 1
@@ -97,7 +96,6 @@ class LogicaParser ( Parser ):
     WS=17
     COMMENT=18
     INVALID_NUMBER=19
-    ERROR_CHAR=20
 
     def __init__(self, input:TokenStream, output:TextIO = sys.stdout):
         super().__init__(input, output)

@@ -75,4 +75,3 @@ COMMENT : '//' ~[\r\n]* -> skip ;
 
 // Manejo de errores léxicos
 INVALID_NUMBER : [0-9]+ ; // números no permitidos
-ERROR_CHAR : . ;           // cualquier otro carácter inválido
