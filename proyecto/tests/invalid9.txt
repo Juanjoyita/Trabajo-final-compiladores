@@ -1,1 +1,35 @@
-a = 123;
+a = TRUE;
+
+b = FALSE
+
+c = a AND ; 
+
+d = a OR (TRUE;
+
+e = NOT NOT (a AND);
+
+f = a AND (b OR c));
+
+if a AND TRUE) {
+    g = TRUE;
+}
+
+if (a OR b {
+    h = FALSE;
+}
+
+while a AND b) {
+    i = TRUE;
+}
+
+while (a OR ) {
+    j = TRUE;
+}
+
+k = (TRUE AND FALSE;
+
+print(a b);
+
+print((a));
+
+print();

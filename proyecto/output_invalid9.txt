@@ -1,0 +1,60 @@
+===== Mini Compilador - Registro de Ejecución =====
+
+[INPUT]
+
+a = TRUE;
+
+b = FALSE
+
+c = a AND ; 
+
+d = a OR (TRUE;
+
+e = NOT NOT (a AND);
+
+f = a AND (b OR c));
+
+if a AND TRUE) {
+    g = TRUE;
+}
+
+if (a OR b {
+    h = FALSE;
+}
+
+while a AND b) {
+    i = TRUE;
+}
+
+while (a OR ) {
+    j = TRUE;
+}
+
+k = (TRUE AND FALSE;
+
+print(a b);
+
+print((a));
+
+print();
+
+
+[LÉXICOS] ✔ Sin errores
+
+[SINTÁCTICOS]
+
+  - [Línea 5, Columna 0] Error sintáctico: missing ';' at 'c'
+  - [Línea 5, Columna 10] Error sintáctico: extraneous input ';' expecting {'(', 'TRUE', 'FALSE', 'NOT', ID}
+  - [Línea 7, Columna 2] Error sintáctico: mismatched input '=' expecting ';'
+  - [Línea 7, Columna 6] Error sintáctico: mismatched input 'OR' expecting '='
+  - [Línea 9, Columna 18] Error sintáctico: mismatched input ')' expecting {'(', 'TRUE', 'FALSE', 'NOT', ID}
+  - [Línea 11, Columna 18] Error sintáctico: extraneous input ')' expecting ';'
+  - [Línea 13, Columna 3] Error sintáctico: missing '(' at 'a'
+  - [Línea 17, Columna 11] Error sintáctico: missing ')' at '{'
+  - [Línea 21, Columna 6] Error sintáctico: missing '(' at 'a'
+  - [Línea 25, Columna 12] Error sintáctico: mismatched input ')' expecting {'(', 'TRUE', 'FALSE', 'NOT', ID}
+  - [Línea 29, Columna 19] Error sintáctico: missing ')' at ';'
+  - [Línea 31, Columna 8] Error sintáctico: extraneous input 'b' expecting ')'
+  - [Línea 33, Columna 6] Error sintáctico: extraneous input '(' expecting ID
+  - [Línea 33, Columna 9] Error sintáctico: extraneous input ')' expecting ';'
+  - [Línea 35, Columna 6] Error sintáctico: missing ID at ')'
