@@ -1,20 +1,20 @@
-import sys                   # Permite leer argumentos desde la terminal, por ejemplo: python main.py input.txt
-import subprocess            # Permite ejecutar el programa Python que el compilador genera al final
-from antlr4 import *         # Importa todas las clases necesarias para usar ANTLR en Python (Lexer, Parser, ParseTree)
-import os                    # Manejo de rutas de archivos, nombres y extensiones
+import sys                   # Permite leer argumentos desde la terminal (por ej. input.txt)
+import subprocess            # Se usa para ejecutar el archivo Python generado por el compilador
+from antlr4 import *         # Librerías base de ANTLR para crear lexer, parser y recorrer el árbol
+import os                    # Manejo de rutas de archivos en el sistema operativo
 
 # Importación del Lexer y Parser generados automáticamente por ANTLR
-from generated.LogicaLexer import LogicaLexer      # Analizador léxico: convierte caracteres → tokens
-from generated.LogicaParser import LogicaParser    # Analizador sintáctico: convierte tokens → árbol sintáctico (AST)
+from generated.LogicaLexer import LogicaLexer
+from generated.LogicaParser import LogicaParser
 
-# Importación de los listeners personalizados para manejo de errores léxicos y sintácticos
-from semantic_analyzer.semantic_visitor import SemanticAnalyzer     # Visitante que analiza errores semánticos
-from semantic_analyzer.listener import LexerErrorListener, SyntaxErrorListener  # Detectan errores en tiempo de compilación
+# Importamos los listeners personalizados para errores léxicos/sintácticos
+from semantic_analyzer.semantic_visitor import SemanticAnalyzer
+from semantic_analyzer.listener import LexerErrorListener, SyntaxErrorListener
 
-# Generador de código Python final (código ejecutable traducido del lenguaje lógico)
+# Importamos generador de código Python final
 from codegen.generator import CodeGenerator
 
-# Generador de código intermedio IR / TAC (Three Address Code)
+# Importamos generador del IR (Intermediate Representation / Código de 3 direcciones)
 from codegen.ir_generator import IRGenerator
 
 
@@ -23,17 +23,19 @@ from codegen.ir_generator import IRGenerator
 # ======================================================
 def print_tree(node, rule_names, indent=""):
     """
-    Imprime el árbol AST con indentación para visualizar la estructura del programa.
-    Esto es útil para entender cómo el parser interpreta el código fuente.
+    Imprime el árbol sintáctico con indentación visual.
+    Esto se usa solo como herramienta de depuración.
     """
-    if node.getChildCount() == 0:          # Si es un nodo hoja (token final)
+    # Nodo terminal → token literal
+    if node.getChildCount() == 0:
         print(indent + f"- {node.getText()}")
         return
 
-    rule_name = rule_names[node.getRuleIndex()]    # Obtiene el nombre de la regla
+    # Nodo compuesto → regla de la gramática
+    rule_name = rule_names[node.getRuleIndex()]
     print(indent + f"[{rule_name}]")
 
-    # Procesa hijos del nodo recursivamente
+    # Recorrer hijos recursivamente
     for i in range(node.getChildCount()):
         print_tree(node.getChild(i), rule_names, indent + "  ")
 
@@ -43,131 +45,173 @@ def print_tree(node, rule_names, indent=""):
 # ======================================================
 def main():
 
-    # Verifica que se haya pasado un archivo como argumento
+    # ----------------------------------------------------
+    # 0. Verificar archivo de entrada
+    # ----------------------------------------------------
     if len(sys.argv) < 2:
         print("Uso: python main.py input.txt")
         return
 
-    input_file = sys.argv[1]  # Archivo que contiene el código fuente del usuario
+    input_file = sys.argv[1]  # Ruta del archivo fuente a compilar
 
-    # Construye nombres automáticos para los archivos de salida
+    # Construimos nombres para los archivos de salida
     base_name = os.path.splitext(os.path.basename(input_file))[0]
-    output_text_file = f"output_{base_name}.txt"             # Archivo de LOG
-    output_program_file = f"output_program_{base_name}.py"   # Código Python generado
+    output_text_file = f"output_{base_name}.txt"            # Archivo log
+    output_program_file = f"output_program_{base_name}.py"  # Código Python generado
 
-    log = []   # Lista para almacenar todo el registro del proceso
+    log = []  # Lista para registrar todo lo que pasa en el compilador
     log.append("===== Mini Compilador - Registro de Ejecución =====\n")
 
     # ======================================================
-    # 1. FASE DE LECTURA DEL FUENTE
+    # 1. LECTURA DEL ARCHIVO DE ENTRADA
     # ======================================================
     log.append("[INPUT]\n")
     try:
+        # Intentamos leer el archivo fuente
         with open(input_file, "r", encoding="utf-8") as f:
-            log.append(f.read() + "\n")    # Guarda el contenido del archivo en el log
+            log.append(f.read() + "\n")
     except:
+        # Si falla → igual guardamos log
         log.append("Error: No se pudo leer el archivo.\n")
         with open(output_text_file, "w") as f:
             f.write("\n".join(log))
         return
 
     # ======================================================
-    # 2. FASE LÉXICA — LEXER
+    # 2. FASE LÉXICA
     # ======================================================
     print(">>> FASE LÉXICA...")
 
-    input_stream = FileStream(input_file, encoding="utf-8")  # Carga el archivo como flujo de caracteres
-    lexer = LogicaLexer(input_stream)                        # Crea el lexer sobre el flujo
+    input_stream = FileStream(input_file, encoding="utf-8")
+    lexer = LogicaLexer(input_stream)
 
-    # Se instalan los listeners de error personalizados
+    # Listener personalizado para errores léxicos
     lexer_errors = LexerErrorListener()
     lexer.removeErrorListeners()
     lexer.addErrorListener(lexer_errors)
 
-    tokens = CommonTokenStream(lexer)   # Convierte los tokens encontrados a un buffer
-    tokens.fill()                        # Fuerza a que el lexer procese toda la entrada
+    # Convertimos tokens en flujo para el parser
+    tokens = CommonTokenStream(lexer)
+    tokens.fill()
 
-    if lexer_errors.errors:             # Si hubo errores léxicos, se detiene el proceso
+    # Si hay errores léxicos → detener compilación pero guardar log
+    if lexer_errors.errors:
         log.append("[LÉXICOS]\n")
         for e in lexer_errors.errors:
             log.append("  - " + e)
+
         print("❌ Error léxico.")
+
+        with open(output_text_file, "w") as f:
+            f.write("\n".join(log))
         return
 
     print("✔ Léxico OK")
     log.append("[LÉXICOS] ✔ Sin errores\n")
 
     # ======================================================
-    # 3. FASE SINTÁCTICA — PARSER
+    # 3. FASE SINTÁCTICA
     # ======================================================
     print(">>> FASE SINTÁCTICA...")
 
-    parser = LogicaParser(tokens)       # Crea el parser usando los tokens detectados
+    parser = LogicaParser(tokens)
 
+    # Listener personalizado de errores sintácticos
     syntax_errors = SyntaxErrorListener()
     parser.removeErrorListeners()
     parser.addErrorListener(syntax_errors)
 
-    tree = parser.program()             # Punto inicial del lenguaje (regla raíz)
+    # Parseamos el programa completo
+    tree = parser.program()
 
-    if syntax_errors.errors:            # Si hubo errores en la estructura del lenguaje
+    # Si hubo errores sintácticos → detener compilación pero guardar log
+    if syntax_errors.errors:
         log.append("[SINTÁCTICOS]\n")
         for e in syntax_errors.errors:
             log.append("  - " + e)
+
         print("❌ Error sintáctico.")
+
+        with open(output_text_file, "w") as f:
+            f.write("\n".join(log))
         return
 
     print("✔ Sintaxis OK")
     log.append("[SINTÁCTICOS] ✔ Sin errores\n")
 
     # ======================================================
-    # 4. FASE SEMÁNTICA — VALIDACIÓN DE SIGNIFICADO
+    # 4. FASE SEMÁNTICA
     # ======================================================
     print(">>> FASE SEMÁNTICA...")
 
-    analyzer = SemanticAnalyzer()   # Analizador semántico creado por ti
-    analyzer.visit(tree)            # Recorre el AST y valida reglas semánticas
+    analyzer = SemanticAnalyzer()  # Comprobador semántico
+    analyzer.visit(tree)
 
+    # Si hay errores semánticos → guardar log y detener
     if analyzer.errors:
         log.append("[SEMÁNTICA]\n")
         for e in analyzer.errors:
             log.append("  - " + e)
+
         print("❌ Error semántico.")
+
+        with open(output_text_file, "w") as f:
+            f.write("\n".join(log))
         return
 
     print("✔ Semántica OK")
     log.append("[SEMÁNTICA] ✔ Sin errores\n")
 
     # ======================================================
-    # 5. GENERACIÓN DE IR (Intermediate Representation / TAC)
+    # 5. FASE DE IR (INTERMEDIATE REPRESENTATION)
     # ======================================================
-    print(">>> GENERANDO IR (Intermediate Representation)...")
+    print(">>> GENERANDO IR...")
 
-    ir_generator = IRGenerator()       # Instancia del generador de IR
-    ir_code = ir_generator.visit(tree) # Recorre el AST y devuelve lista de instrucciones TAC
+    try:
+        ir_generator = IRGenerator()   # Generador TAC
+        ir_code = ir_generator.visit(tree)
 
-    print("✔ IR generado correctamente.\n")
-    print("=== CÓDIGO IR ===")
-    for instr in ir_code:
-        print(instr)
+        print("✔ IR generado correctamente.\n")
+        print("=== CÓDIGO IR ===")
+        for instr in ir_code:
+            print(instr)
 
-    log.append("[IR] ✔ IR generado\n")
-    for instr in ir_code:
-        log.append("  " + instr)
+        log.append("[IR] ✔ IR generado\n")
+        for instr in ir_code:
+            log.append("  " + instr)
+
+    except Exception as e:
+        # Si falla el IR → registrar error y salir
+        print("❌ Error generando IR:", e)
+        log.append("[IR] Error: " + str(e))
+
+        with open(output_text_file, "w") as f:
+            f.write("\n".join(log))
+        return
 
     # ======================================================
-    # 6. GENERACIÓN DE CÓDIGO PYTHON – CODEGEN
+    # 6. GENERACIÓN DEL CÓDIGO PYTHON FINAL
     # ======================================================
     print(">>> GENERANDO CÓDIGO PYTHON...")
 
-    generator = CodeGenerator()          # Genera un archivo Python ejecutable
-    output_program = generator.visit(tree)
+    try:
+        generator = CodeGenerator()
+        output_program = generator.visit(tree)
 
-    with open(output_program_file, "w") as f:
-        f.write(output_program)
+        # Guardamos el archivo Python generado
+        with open(output_program_file, "w") as f:
+            f.write(output_program)
 
-    print("✔ CODEGEN OK")
-    log.append("[CODEGEN] ✔ Python generado\n")
+        print("✔ CODEGEN OK")
+        log.append("[CODEGEN] ✔ Python generado\n")
+
+    except Exception as e:
+        print("❌ Error en codegen:", e)
+        log.append("[CODEGEN] Error: " + str(e))
+
+        with open(output_text_file, "w") as f:
+            f.write("\n".join(log))
+        return
 
     # ======================================================
     # 7. EJECUCIÓN DEL PROGRAMA PYTHON GENERADO
@@ -177,28 +221,33 @@ def main():
     log.append("[PYTHON OUTPUT]\n")
 
     try:
-        # Ejecuta el archivo Python generado y captura su salida
+        # Ejecutamos el archivo Python generado
         result = subprocess.run(
             ["python3", output_program_file],
             capture_output=True,
             text=True
         )
-        print(result.stdout)      # Muestra en consola
-        log.append(result.stdout) # Guarda en el log
+        print(result.stdout)        # Mostrar salida en consola
+        log.append(result.stdout)   # Guardar salida en el log
+
     except Exception as e:
         print("❌ Error al ejecutar:", e)
-        log.append(str(e))
+        log.append("[RUNTIME] Error: " + str(e))
 
     # ======================================================
-    # 8. GUARDADO DEL LOG FINAL
+    # 8. GUARDAR LOG FINAL
     # ======================================================
     log.append("[FIN DEL PROCESO]\n")
+
+    # Siempre guardamos el log al final de TODO
     with open(output_text_file, "w") as f:
         f.write("\n".join(log))
 
     print(f"✔ Proceso completado. Revisa {output_text_file} y {output_program_file}")
 
 
-# Punto de entrada estándar de Python
+# ======================================================
+# EJECUCIÓN DIRECTA DEL SCRIPT
+# ======================================================
 if __name__ == "__main__":
     main()
