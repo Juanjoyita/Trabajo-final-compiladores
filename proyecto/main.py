@@ -140,6 +140,13 @@ def main():
     log.append("[SINTÁCTICOS] ✔ Sin errores\n")
 
     # ======================================================
+    # MOSTRAR EL ÁRBOL SINTÁCTICO EN CONSOLA
+    # ======================================================
+    print("\n>>> ÁRBOL SINTÁCTICO (AST):\n")
+    print_tree(tree, parser.ruleNames)
+    print("\n====================================\n")
+
+    # ======================================================
     # 4. FASE SEMÁNTICA
     # ======================================================
     print(">>> FASE SEMÁNTICA...")
